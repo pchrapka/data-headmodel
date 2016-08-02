@@ -56,8 +56,8 @@ for i=1:length(fid_names)
     
 end
 
-mri.hdr.fiducials.mri = fid_anatomical;
-mri.hdr.fiducials.head = fid_anatomical;
+mri.hdr.fiducial.mri = fid_anatomical;
+mri.hdr.fiducial.head = fid_anatomical;
 
 % save mri
 save('icbm152_mri.mat','mri');
@@ -72,6 +72,7 @@ cfg.brainthreshold = 0.5;
 cfg.scalpthreshold = 0.15;
 cfg.downsample = 1;
 cfg.output = {'brain','skull','scalp'};
+cfg.units = 'mm';
 
 seg = ft_volumesegment(cfg, mri);
 
