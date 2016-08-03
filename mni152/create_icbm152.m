@@ -60,32 +60,65 @@ mri.hdr.fiducial.mri = fid_anatomical;
 mri.hdr.fiducial.head = fid_anatomical;
 
 % save mri
-save('icbm152_mri.mat','mri');
+outputfile = 'icbm152_mri.mat';
+save(outputfile,'mri');
 
 %% segment volume
 %%%%%%%%%%%%%%%%%%%%%%%%%
-
 % Source: http://www.agricolab.de/template-headmodel-for-fieldtrip-eeg-source-reconstruction-based-on-icbm152/
+
+inputfile = outputfile;
+mri = loadfile(inputfile);
 
 cfg = [];
 cfg.brainthreshold = 0.5;
 cfg.scalpthreshold = 0.15;
 cfg.downsample = 1;
 cfg.output = {'brain','skull','scalp'};
-cfg.units = 'mm';
 
 seg = ft_volumesegment(cfg, mri);
 
-save('icbm152_seg.mat','seg');
+outputfile = 'icbm152_seg.mat';
+save(outputfile,'seg');
 
 
 %% prepare mesh
 %%%%%%%%%%%%%%%%%%%%%%%%%
+inputfile = outputfile;
+seg = loadfile(inputfile);
+
 cfg = [];
 cfg.method = 'projectmesh';
 cfg.tissue = {'brain','skull','scalp'};
-cfg.numvertices = [2000, 2000, 1000];
+cfg.numvertices = [1000, 1000, 1000];
 
 mesh = ft_prepare_mesh(cfg,seg);
+scaling = [0.999 1 1.001];
+for i=1:length(scaling)
+    mesh(i).pnt = mesh(i).pnt.*scaling(i);
+end
 
-save('icbm152_mesh.mat','mesh');
+outputfile = 'icbm152_mesh.mat';
+save(outputfile,'mesh');
+
+% figure
+% hold on
+% ft_plot_mesh(mesh(1));
+% ft_plot_mesh(mesh(2));
+% % ft_plot_mesh(mesh(3));
+% alpha 0.1
+
+%% prepare headmodel
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+inputfile = outputfile;
+mesh = loadfile(inputfile);
+
+cfg = [];
+cfg.method = 'dipoli';
+headmodel = ft_prepare_headmodel(cfg,mesh);
+headmodel = ft_convert_units(headmodel,'cm');
+
+outputfile = 'icbm152_bem.mat';
+save(outputfile,'headmodel');
+
